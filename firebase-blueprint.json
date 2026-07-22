@@ -1,0 +1,42 @@
+{
+  "entities": {
+    "users": {
+      "title": "users",
+      "description": "User profile records",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "department": { "type": "string" },
+        "semester": { "type": "string" },
+        "phone": { "type": "string" },
+        "role": { "type": "string", "enum": ["student", "admin"] },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["uid", "name", "email", "role"]
+    },
+    "complaints": {
+      "title": "complaints",
+      "description": "College facility complaints",
+      "type": "object",
+      "properties": {
+        "complaintId": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "category": { "type": "string" },
+        "building": { "type": "string" },
+        "roomNumber": { "type": "string" },
+        "priority": { "type": "string", "enum": ["Low", "Medium", "High"] },
+        "status": { "type": "string", "enum": ["Pending", "In Progress", "Resolved", "Rejected"] },
+        "imageUrl": { "type": "string" },
+        "studentName": { "type": "string" },
+        "studentEmail": { "type": "string" },
+        "userId": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["title", "description", "category", "userId"]
+    }
+  }
+}

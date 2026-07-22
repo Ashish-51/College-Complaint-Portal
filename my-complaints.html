@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Complaints - Smart College Complaint Portal</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar Container -->
+    <div id="sidebar-container"></div>
+
+    <!-- Main Wrapper -->
+    <div class="main-wrapper">
+      <!-- Top Navbar Container -->
+      <div id="top-navbar-container"></div>
+
+      <!-- Main Page Content -->
+      <main class="page-container">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">My Submitted Complaints</h2>
+            <p style="font-size: 13px; color: var(--text-secondary);">View, filter, edit, or delete facility complaints you submitted.</p>
+          </div>
+          <a href="/submit-complaint.html" class="btn btn-primary btn-sm">
+            <svg style="width:16px;height:16px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Submit New Complaint
+          </a>
+        </div>
+
+        <!-- Toolbar Search & Filters -->
+        <div class="toolbar-card">
+          <div class="search-input-wrapper">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <input type="text" id="student-search" class="search-input" placeholder="Search my complaints by Title or Description..." />
+          </div>
+
+          <div class="filter-group">
+            <select id="student-filter-category" class="form-select" style="width: auto;">
+              <option value="all">All Categories</option>
+              <option value="Classroom">Classroom</option>
+              <option value="Laboratory">Laboratory</option>
+              <option value="Library">Library</option>
+              <option value="Hostel">Hostel</option>
+              <option value="WiFi">WiFi</option>
+              <option value="Bus">Bus</option>
+              <option value="Canteen">Canteen</option>
+              <option value="Water">Water</option>
+              <option value="Electricity">Electricity</option>
+              <option value="Furniture">Furniture</option>
+              <option value="Sports">Sports</option>
+              <option value="Others">Others</option>
+            </select>
+
+            <select id="student-filter-status" class="form-select" style="width: auto;">
+              <option value="all">All Statuses</option>
+              <option value="Pending">Pending</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Resolved">Resolved</option>
+              <option value="Rejected">Rejected</option>
+            </select>
+
+            <select id="student-filter-priority" class="form-select" style="width: auto;">
+              <option value="all">All Priorities</option>
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-responsive">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Complaint Title</th>
+                <th>Category</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Submitted On</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="my-complaints-tbody">
+              <!-- Rendered dynamically by JS -->
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Edit Complaint Modal (Only allowed for Pending complaints) -->
+  <div class="modal-backdrop" id="edit-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">Edit Pending Complaint</h3>
+        <button class="modal-close" id="close-edit-modal">&times;</button>
+      </div>
+      <form id="edit-complaint-form">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Title <span class="required">*</span></label>
+            <input type="text" id="edit-title" class="form-control" required />
+          </div>
+
+          <div class="grid-2" style="gap: 12px; margin-bottom: 0;">
+            <div class="form-group">
+              <label class="form-label">Category</label>
+              <select id="edit-category" class="form-select">
+                <option value="Classroom">Classroom</option>
+                <option value="Laboratory">Laboratory</option>
+                <option value="Library">Library</option>
+                <option value="Hostel">Hostel</option>
+                <option value="WiFi">WiFi</option>
+                <option value="Bus">Bus</option>
+                <option value="Canteen">Canteen</option>
+                <option value="Water">Water</option>
+                <option value="Electricity">Electricity</option>
+                <option value="Furniture">Furniture</option>
+                <option value="Sports">Sports</option>
+                <option value="Others">Others</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Building</label>
+              <select id="edit-building" class="form-select">
+                <option value="Main Academic Block">Main Academic Block</option>
+                <option value="Science & Tech Wing">Science & Tech Wing</option>
+                <option value="MCA Computer Lab Block">MCA Computer Lab Block</option>
+                <option value="Library Complex">Library Complex</option>
+                <option value="Boys Hostel A">Boys Hostel A</option>
+                <option value="Girls Hostel B">Girls Hostel B</option>
+                <option value="Sports Complex">Sports Complex</option>
+                <option value="Central Canteen">Central Canteen</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid-2" style="gap: 12px; margin-bottom: 0;">
+            <div class="form-group">
+              <label class="form-label">Room Number</label>
+              <input type="text" id="edit-room" class="form-control" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Priority</label>
+              <select id="edit-priority" class="form-select">
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Description <span class="required">*</span></label>
+            <textarea id="edit-description" class="form-textarea" rows="4" required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" id="cancel-edit-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initMyComplaintsPage } from "./js/my-complaints.js";
+    initMyComplaintsPage();
+  </script>
+</body>
+</html>

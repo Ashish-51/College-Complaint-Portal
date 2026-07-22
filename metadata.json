@@ -1,0 +1,6 @@
+{
+  "name": "Smart College Complaint Portal",
+  "description": "An end-to-end campus complaint management portal for submitting, tracking, and resolving college facility issues with real-time status tracking and admin workflows.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

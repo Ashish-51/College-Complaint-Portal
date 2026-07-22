@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Profile - Smart College Complaint Portal</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar Container -->
+    <div id="sidebar-container"></div>
+
+    <!-- Main Wrapper -->
+    <div class="main-wrapper">
+      <!-- Top Navbar Container -->
+      <div id="top-navbar-container"></div>
+
+      <!-- Main Page Content -->
+      <main class="page-container" style="max-width: 900px;">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">My Account & Settings</h2>
+            <p style="font-size: 13px; color: var(--text-secondary);">Manage your profile details and account security.</p>
+          </div>
+        </div>
+
+        <div class="grid-3" style="gap: 24px;">
+          <!-- Profile Badge Card -->
+          <div class="card" style="align-self: flex-start; text-align: center;">
+            <div class="avatar" id="profile-avatar" style="width: 72px; height: 72px; font-size: 28px; font-weight: 800; margin: 0 auto 16px;">
+              U
+            </div>
+            <h3 id="profile-name-header" style="font-size: 18px; font-weight: 800; color: var(--text-primary); margin-bottom: 4px;">
+              Loading...
+            </h3>
+            <span class="badge badge-progress" id="profile-role-badge" style="margin-bottom: 16px;">
+              STUDENT
+            </span>
+
+            <hr style="border:none; border-top:1px solid var(--border-color); margin: 16px 0;" />
+
+            <div style="font-size: 12px; color: var(--text-muted); text-align: left;">
+              <div>ACCOUNT CREATED:</div>
+              <div id="profile-created-date" style="font-weight: 600; color: var(--text-primary); margin-top: 2px;">
+                N/A
+              </div>
+            </div>
+          </div>
+
+          <!-- Forms Container -->
+          <div style="grid-column: span 2;" class="grid-1">
+            <!-- Edit Personal Info Form -->
+            <div class="card">
+              <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+                Personal Information
+              </h3>
+              <form id="update-profile-form">
+                <div class="form-group">
+                  <label class="form-label">Full Name <span class="required">*</span></label>
+                  <input type="text" id="profile-name-input" class="form-control" required />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Email Address (Read-only)</label>
+                  <input type="email" id="profile-email-input" class="form-control" style="background: var(--surface-alt); cursor: not-allowed;" readonly />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Phone Number <span class="required">*</span></label>
+                  <input type="tel" id="profile-phone-input" class="form-control" required />
+                </div>
+
+                <div class="grid-2" style="gap: 16px; margin-bottom: 0;">
+                  <div class="form-group">
+                    <label class="form-label">Department</label>
+                    <select id="profile-dept-input" class="form-select">
+                      <option value="Master of Computer Applications (MCA)">MCA</option>
+                      <option value="MBA">MBA</option>
+                      <option value="B.Tech Computer Science">B.Tech CSE</option>
+                      <option value="B.Tech Electronics (ECE)">B.Tech ECE</option>
+                      <option value="B.Tech Mechanical">B.Tech Mechanical</option>
+                      <option value="Civil Engineering">Civil Engineering</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Semester</label>
+                    <select id="profile-semester-input" class="form-select">
+                      <option value="Semester 1">Semester 1</option>
+                      <option value="Semester 2">Semester 2</option>
+                      <option value="Semester 3">Semester 3</option>
+                      <option value="Semester 4">Semester 4</option>
+                      <option value="Semester 5">Semester 5</option>
+                      <option value="Semester 6">Semester 6</option>
+                    </select>
+                  </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="margin-top: 8px;">
+                  Save Profile Changes
+                </button>
+              </form>
+            </div>
+
+            <!-- Change Password Form -->
+            <div class="card">
+              <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+                Change Password
+              </h3>
+              <form id="change-password-form">
+                <div class="form-group">
+                  <label class="form-label">Current Password <span class="required">*</span></label>
+                  <input type="password" id="current-password" class="form-control" placeholder="••••••••" required />
+                </div>
+
+                <div class="grid-2" style="gap: 16px; margin-bottom: 0;">
+                  <div class="form-group">
+                    <label class="form-label">New Password <span class="required">*</span></label>
+                    <input type="password" id="new-password" class="form-control" placeholder="Min 6 characters" required />
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Confirm New Password <span class="required">*</span></label>
+                    <input type="password" id="confirm-new-password" class="form-control" placeholder="Re-enter new password" required />
+                  </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="margin-top: 8px;">
+                  Update Password
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initProfilePage } from "./js/profile.js";
+    initProfilePage();
+  </script>
+</body>
+</html>

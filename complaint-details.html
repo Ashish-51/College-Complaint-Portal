@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Complaint Details - Smart College Complaint Portal</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar Container -->
+    <div id="sidebar-container"></div>
+
+    <!-- Main Wrapper -->
+    <div class="main-wrapper">
+      <!-- Top Navbar Container -->
+      <div id="top-navbar-container"></div>
+
+      <!-- Main Page Content -->
+      <main class="page-container" id="details-content">
+        <!-- Rendered dynamically by js/complaint-details.js -->
+        <div style="text-align: center; padding: 60px 0;">
+          <div style="font-size: 16px; color: var(--text-muted);">Loading complaint details...</div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initComplaintDetailsPage } from "./js/complaint-details.js";
+    initComplaintDetailsPage();
+  </script>
+</body>
+</html>

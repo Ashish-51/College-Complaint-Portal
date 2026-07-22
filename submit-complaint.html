@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Submit Complaint - Smart College Complaint Portal</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar Container -->
+    <div id="sidebar-container"></div>
+
+    <!-- Main Wrapper -->
+    <div class="main-wrapper">
+      <!-- Top Navbar Container -->
+      <div id="top-navbar-container"></div>
+
+      <!-- Main Page Content -->
+      <main class="page-container" style="max-width: 800px;">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Report a Campus Issue</h2>
+            <p style="font-size: 13px; color: var(--text-secondary);">Fill out the facility complaint form below. College administration will review and take action.</p>
+          </div>
+          <a href="/my-complaints.html" class="btn btn-secondary btn-sm">My Complaints List</a>
+        </div>
+
+        <div class="card">
+          <form id="complaint-form">
+            <!-- Complaint Title -->
+            <div class="form-group">
+              <label class="form-label">Complaint Title <span class="required">*</span></label>
+              <input type="text" id="complaint-title" class="form-control" placeholder="e.g. Projector not working in Computer Lab 2" required />
+              <span class="form-hint">Provide a concise, descriptive title (Min 5 characters).</span>
+            </div>
+
+            <!-- Category & Building -->
+            <div class="grid-2" style="gap: 16px; margin-bottom: 0;">
+              <div class="form-group">
+                <label class="form-label">Facility Category <span class="required">*</span></label>
+                <select id="complaint-category" class="form-select" required>
+                  <option value="" disabled selected>Select Issue Category</option>
+                  <option value="Classroom">Classroom</option>
+                  <option value="Laboratory">Laboratory</option>
+                  <option value="Library">Library</option>
+                  <option value="Hostel">Hostel</option>
+                  <option value="WiFi">WiFi</option>
+                  <option value="Bus">Bus</option>
+                  <option value="Canteen">Canteen</option>
+                  <option value="Water">Water</option>
+                  <option value="Electricity">Electricity</option>
+                  <option value="Furniture">Furniture</option>
+                  <option value="Sports">Sports</option>
+                  <option value="Others">Others</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Building / Block <span class="required">*</span></label>
+                <select id="complaint-building" class="form-select" required>
+                  <option value="Main Academic Block">Main Academic Block</option>
+                  <option value="Science & Tech Wing">Science & Tech Wing</option>
+                  <option value="MCA Computer Lab Block" selected>MCA Computer Lab Block</option>
+                  <option value="Library Complex">Library Complex</option>
+                  <option value="Boys Hostel A">Boys Hostel A</option>
+                  <option value="Girls Hostel B">Girls Hostel B</option>
+                  <option value="Sports Complex">Sports Complex</option>
+                  <option value="Central Canteen">Central Canteen</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Room & Priority -->
+            <div class="grid-2" style="gap: 16px; margin-bottom: 0;">
+              <div class="form-group">
+                <label class="form-label">Room / Lab Number</label>
+                <input type="text" id="complaint-room" class="form-control" placeholder="e.g. Lab 204 or Ground Floor Hall" />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Priority Level <span class="required">*</span></label>
+                <select id="complaint-priority" class="form-select" required>
+                  <option value="Low">🌱 Low (Standard request)</option>
+                  <option value="Medium" selected>⚡ Medium (Affects routine work)</option>
+                  <option value="High">🔥 High (Urgent safety or breakdown)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Description -->
+            <div class="form-group">
+              <label class="form-label">Issue Description <span class="required">*</span></label>
+              <textarea id="complaint-description" class="form-textarea" rows="4" placeholder="Describe the facility issue in detail (location, exact problem, time noticed)..." required></textarea>
+              <span class="form-hint">Provide clear details to help technical staff resolve it quickly (Min 15 characters).</span>
+            </div>
+
+            <!-- File Upload -->
+            <div class="form-group">
+              <label class="form-label">Upload Photo Evidence (Optional)</label>
+              <input type="file" id="complaint-image" accept="image/jpeg,image/jpg,image/png" style="display: none;" />
+
+              <div class="file-dropzone" id="image-dropzone">
+                <div class="dropzone-icon">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                </div>
+                <div style="font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">
+                  Click to browse or drag & drop photo here
+                </div>
+                <div style="font-size: 12px; color: var(--text-muted);">
+                  PNG, JPG, JPEG up to 5MB
+                </div>
+              </div>
+
+              <div id="image-preview-container"></div>
+            </div>
+
+            <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
+              <a href="/student-dashboard.html" class="btn btn-secondary">Cancel</a>
+              <button type="submit" class="btn btn-primary" style="padding: 10px 28px;">
+                Submit Complaint
+              </button>
+            </div>
+          </form>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initSubmitComplaintPage } from "./js/submit-complaint.js";
+    initSubmitComplaintPage();
+  </script>
+</body>
+</html>

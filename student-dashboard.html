@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Dashboard - Smart College Complaint Portal</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar Container -->
+    <div id="sidebar-container"></div>
+
+    <!-- Main Wrapper -->
+    <div class="main-wrapper">
+      <!-- Top Navbar Container -->
+      <div id="top-navbar-container"></div>
+
+      <!-- Main Page Content -->
+      <main class="page-container">
+        <!-- Dashboard Welcome Banner -->
+        <div class="card" style="margin-bottom: 24px; background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%); color: white;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+            <div>
+              <h2 id="student-greeting" style="font-size: 24px; font-weight: 800; margin-bottom: 6px;">Welcome Back, Student</h2>
+              <p style="font-size: 14px; opacity: 0.9;">Track your reported facility issues and submit new requests easily.</p>
+            </div>
+            <a href="/submit-complaint.html" class="btn" style="background: white; color: var(--primary); font-weight: 700;">
+              <svg style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              Submit New Complaint
+            </a>
+          </div>
+        </div>
+
+        <!-- Metric Stat Cards -->
+        <div class="grid-4" style="margin-bottom: 32px;">
+          <div class="card stat-card">
+            <div class="stat-info">
+              <div class="stat-value" id="stat-total">0</div>
+              <div class="stat-label">Total Complaints</div>
+            </div>
+            <div class="stat-icon-wrapper total">
+              <svg style="width:24px;height:24px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+            </div>
+          </div>
+
+          <div class="card stat-card">
+            <div class="stat-info">
+              <div class="stat-value" id="stat-pending">0</div>
+              <div class="stat-label">Pending Review</div>
+            </div>
+            <div class="stat-icon-wrapper pending">
+              <svg style="width:24px;height:24px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+          </div>
+
+          <div class="card stat-card">
+            <div class="stat-info">
+              <div class="stat-value" id="stat-resolved">0</div>
+              <div class="stat-label">Resolved Issues</div>
+            </div>
+            <div class="stat-icon-wrapper resolved">
+              <svg style="width:24px;height:24px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+          </div>
+
+          <div class="card stat-card">
+            <div class="stat-info">
+              <div class="stat-value" id="stat-rejected">0</div>
+              <div class="stat-label">Rejected Requests</div>
+            </div>
+            <div class="stat-icon-wrapper rejected">
+              <svg style="width:24px;height:24px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Complaints Section -->
+        <div class="section-header">
+          <h2 class="section-title">Recent Complaints</h2>
+          <a href="/my-complaints.html" class="btn btn-outline btn-sm">View All Complaints &rarr;</a>
+        </div>
+
+        <div class="table-responsive">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Complaint Title</th>
+                <th>Category</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Submitted On</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="recent-complaints-tbody">
+              <!-- Rendered dynamically by JS -->
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initStudentDashboard } from "./js/student-dashboard.js";
+    initStudentDashboard();
+  </script>
+</body>
+</html>

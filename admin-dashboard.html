@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard - Smart College Complaint Portal</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar Container -->
+    <div id="sidebar-container"></div>
+
+    <!-- Main Wrapper -->
+    <div class="main-wrapper">
+      <!-- Top Navbar Container -->
+      <div id="top-navbar-container"></div>
+
+      <!-- Main Page Content -->
+      <main class="page-container">
+        <!-- Page Header -->
+        <div class="section-header">
+          <div>
+            <h2 class="section-title" style="font-size: 22px;">Administrator Control Center</h2>
+            <p style="font-size: 13px; color: var(--text-secondary);">Manage campus complaints, assign priorities, update status, and monitor visual analytics.</p>
+          </div>
+        </div>
+
+        <!-- Stat Metric Cards -->
+        <div class="grid-4" style="margin-bottom: 28px;">
+          <div class="card stat-card">
+            <div class="stat-info">
+              <div class="stat-value" id="admin-stat-total">0</div>
+              <div class="stat-label">Total Complaints</div>
+            </div>
+            <div class="stat-icon-wrapper total">
+              <svg style="width:24px;height:24px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+            </div>
+          </div>
+
+          <div class="card stat-card">
+            <div class="stat-info">
+              <div class="stat-value" id="admin-stat-pending">0</div>
+              <div class="stat-label">Pending Action</div>
+            </div>
+            <div class="stat-icon-wrapper pending">
+              <svg style="width:24px;height:24px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+          </div>
+
+          <div class="card stat-card">
+            <div class="stat-info">
+              <div class="stat-value" id="admin-stat-resolved">0</div>
+              <div class="stat-label">Resolved</div>
+            </div>
+            <div class="stat-icon-wrapper resolved">
+              <svg style="width:24px;height:24px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            </div>
+          </div>
+
+          <div class="card stat-card">
+            <div class="stat-info">
+              <div class="stat-value" id="admin-stat-high">0</div>
+              <div class="stat-label">High Priority</div>
+            </div>
+            <div class="stat-icon-wrapper high">
+              <svg style="width:24px;height:24px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chart.js Analytics Visualizations -->
+        <div class="grid-3" style="margin-bottom: 32px;">
+          <div class="card">
+            <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 16px;">Complaints by Category</h3>
+            <canvas id="chart-category" style="max-height: 220px;"></canvas>
+          </div>
+
+          <div class="card">
+            <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 16px;">Status Breakdown</h3>
+            <canvas id="chart-status" style="max-height: 220px;"></canvas>
+          </div>
+
+          <div class="card">
+            <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 16px;">Monthly Volume Trend</h3>
+            <canvas id="chart-monthly" style="max-height: 220px;"></canvas>
+          </div>
+        </div>
+
+        <!-- Search & Filter Toolbar -->
+        <div id="complaints" class="toolbar-card">
+          <div class="search-input-wrapper">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <input type="text" id="admin-search" class="search-input" placeholder="Search by Title, Student Name, Category, or Status..." />
+          </div>
+
+          <div class="filter-group">
+            <select id="filter-category" class="form-select" style="width: auto;">
+              <option value="all">All Categories</option>
+              <option value="Classroom">Classroom</option>
+              <option value="Laboratory">Laboratory</option>
+              <option value="Library">Library</option>
+              <option value="Hostel">Hostel</option>
+              <option value="WiFi">WiFi</option>
+              <option value="Bus">Bus</option>
+              <option value="Canteen">Canteen</option>
+              <option value="Water">Water</option>
+              <option value="Electricity">Electricity</option>
+              <option value="Furniture">Furniture</option>
+              <option value="Sports">Sports</option>
+              <option value="Others">Others</option>
+            </select>
+
+            <select id="filter-status" class="form-select" style="width: auto;">
+              <option value="all">All Statuses</option>
+              <option value="Pending">Pending</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Resolved">Resolved</option>
+              <option value="Rejected">Rejected</option>
+            </select>
+
+            <select id="filter-priority" class="form-select" style="width: auto;">
+              <option value="all">All Priorities</option>
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Complaints Table -->
+        <div class="table-responsive">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Complaint Title</th>
+                <th>Student Info</th>
+                <th>Category</th>
+                <th>Update Status</th>
+                <th>Priority</th>
+                <th>Submitted On</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-complaints-tbody">
+              <!-- Rendered dynamically by JS -->
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initAdminDashboard } from "./js/admin-dashboard.js";
+    initAdminDashboard();
+  </script>
+</body>
+</html>
