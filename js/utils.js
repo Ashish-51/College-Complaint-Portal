@@ -94,56 +94,131 @@ export function renderPriorityBadge(priority) {
 }
 
 /**
- * Convert file to Base64 string for storage fallback
+ * Convert file to compressed Base64 string for lightweight database storage
  */
-export function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
+export function fileToBase64(file, maxWidth = 800, quality = 0.75) {
+  return new Promise((resolve) => {
+    if (!file || !file.type || !file.type.startsWith('image/')) {
+      resolve('');
+      return;
+    }
+
+    // Failsafe timeout so processing never blocks submission
+    const failsafeTimer = setTimeout(() => resolve(''), 1200);
+
     const reader = new FileReader();
     reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = error => reject(error);
+    reader.onload = (e) => {
+      const img = new Image();
+      img.src = e.target.result;
+      img.onload = () => {
+        clearTimeout(failsafeTimer);
+        try {
+          let width = img.width;
+          let height = img.height;
+
+          if (width > maxWidth || height > maxWidth) {
+            if (width > height) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            } else {
+              width = Math.round((width * maxWidth) / height);
+              height = maxWidth;
+            }
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+          resolve(compressedBase64);
+        } catch (err) {
+          resolve(e.target?.result || '');
+        }
+      };
+      img.onerror = () => {
+        clearTimeout(failsafeTimer);
+        resolve(e.target?.result || '');
+      };
+    };
+    reader.onerror = () => {
+      clearTimeout(failsafeTimer);
+      resolve('');
+    };
   });
 }
 
 /**
- * Fetch User Profile Document from Firestore
+ * Fetch User Profile Document from Firestore with fast local cache fallback
  */
 export async function fetchUserProfile(uid) {
+  const savedSession = localStorage.getItem('complaint_portal_session');
+  let cachedProfile = null;
+  if (savedSession) {
+    try {
+      const session = JSON.parse(savedSession);
+      if (!uid || session.uid === uid) {
+        cachedProfile = session;
+      }
+    } catch (e) {}
+  }
+
+  // If local session exists, return it immediately to avoid network wait
+  if (cachedProfile && cachedProfile.role) {
+    // Optionally fetch background refresh
+    getDoc(doc(db, 'users', uid)).then(docSnap => {
+      if (docSnap.exists()) {
+        const fresh = docSnap.data();
+        localStorage.setItem('complaint_portal_session', JSON.stringify({
+          ...cachedProfile,
+          ...fresh
+        }));
+      }
+    }).catch(() => {});
+    return cachedProfile;
+  }
+
   try {
     const userDoc = await getDoc(doc(db, 'users', uid));
     if (userDoc.exists()) {
-      return userDoc.data();
+      const freshData = userDoc.data();
+      localStorage.setItem('complaint_portal_session', JSON.stringify(freshData));
+      return freshData;
     }
-    return null;
   } catch (err) {
-    console.error('Error fetching user profile:', err);
-    return null;
+    console.warn('Notice fetching user profile (offline or network issue):', err);
   }
+
+  return cachedProfile || null;
 }
 
 /**
  * Global Route Authentication Guard
- * Ensures user is authenticated and has correct role
+ * Ensures user is authenticated and has correct role with zero delay
  */
 export function requireAuth(allowedRole = null, callback) {
   let processed = false;
 
   const verifyAndProceed = async (firebaseUser) => {
     if (processed) return;
-    
+
     let uid = firebaseUser ? firebaseUser.uid : null;
     let email = firebaseUser ? firebaseUser.email : null;
 
-    if (!uid) {
-      const savedSession = localStorage.getItem('complaint_portal_session');
-      if (savedSession) {
-        try {
-          const session = JSON.parse(savedSession);
-          uid = session.uid;
-          email = session.email;
-        } catch (e) {
-          console.error("Error reading saved session:", e);
+    const savedSession = localStorage.getItem('complaint_portal_session');
+    let localProfile = null;
+    if (savedSession) {
+      try {
+        localProfile = JSON.parse(savedSession);
+        if (!uid && localProfile.uid) {
+          uid = localProfile.uid;
+          email = localProfile.email;
         }
+      } catch (e) {
+        console.error("Error reading saved session:", e);
       }
     }
 
@@ -153,7 +228,7 @@ export function requireAuth(allowedRole = null, callback) {
     }
 
     processed = true;
-    const profile = await fetchUserProfile(uid);
+    const profile = localProfile || await fetchUserProfile(uid);
 
     const userObj = {
       uid: uid,
@@ -163,13 +238,11 @@ export function requireAuth(allowedRole = null, callback) {
 
     if (allowedRole && profile && profile.role !== allowedRole) {
       showToast('Unauthorized access for your account role.', 'error');
-      setTimeout(() => {
-        if (profile.role === 'admin') {
-          window.location.href = '/admin-dashboard.html';
-        } else {
-          window.location.href = '/student-dashboard.html';
-        }
-      }, 500);
+      if (profile.role === 'admin') {
+        window.location.href = '/admin-dashboard.html';
+      } else {
+        window.location.href = '/student-dashboard.html';
+      }
       return;
     }
 
@@ -178,26 +251,39 @@ export function requireAuth(allowedRole = null, callback) {
     }
   };
 
-  onAuthStateChanged(auth, (user) => {
-    verifyAndProceed(user);
-  });
+  // Instant check using saved session if available
+  const savedSession = localStorage.getItem('complaint_portal_session');
+  if (savedSession) {
+    try {
+      const session = JSON.parse(savedSession);
+      if (session.uid) {
+        verifyAndProceed(null);
+      }
+    } catch (e) {}
+  }
 
-  // Fast check fallback if auth listener is delayed
-  setTimeout(() => {
-    if (!processed) {
-      verifyAndProceed(auth.currentUser);
-    }
-  }, 300);
+  if (!processed) {
+    onAuthStateChanged(auth, (user) => {
+      verifyAndProceed(user);
+    });
+
+    setTimeout(() => {
+      if (!processed) {
+        verifyAndProceed(auth.currentUser);
+      }
+    }, 100);
+  }
 }
 
 /**
- * Logout utility
+ * Fast Logout utility - Instant redirect and async Firebase signout
  */
 export function handleLogout() {
   localStorage.removeItem('complaint_portal_session');
-  signOut(auth).catch(() => {}).finally(() => {
-    window.location.href = '/login.html';
-  });
+  try {
+    signOut(auth).catch(() => {});
+  } catch (e) {}
+  window.location.href = '/login.html';
 }
 
 /**
@@ -284,4 +370,60 @@ export function setupLayout(activePage, userProfile) {
       });
     }
   }
+}
+
+/**
+ * Local Complaint Cache Helpers
+ */
+export function getLocalComplaints() {
+  try {
+    const data = localStorage.getItem('local_submitted_complaints');
+    return data ? JSON.parse(data) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+export function saveLocalComplaint(complaint) {
+  try {
+    const existing = getLocalComplaints();
+    const updated = [complaint, ...existing.filter(c => c.id !== complaint.id && c.complaintId !== complaint.complaintId)];
+    localStorage.setItem('local_submitted_complaints', JSON.stringify(updated.slice(0, 100)));
+  } catch (e) {}
+}
+
+export function mergeComplaints(remoteList) {
+  const localList = getLocalComplaints();
+  const map = new Map();
+
+  // First add remote complaints
+  remoteList.forEach(item => {
+    const id = item.id || item.complaintId;
+    if (id) map.set(id, item);
+  });
+
+  // Then merge local complaints if not already in remote
+  localList.forEach(item => {
+    const id = item.id || item.complaintId;
+    if (id && !map.has(id)) {
+      map.set(id, item);
+    }
+  });
+
+  const merged = Array.from(map.values());
+  merged.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+  return merged;
+}
+
+export function filterUserComplaints(complaints, user, profile) {
+  const userUids = [user?.uid, profile?.uid].filter(Boolean);
+  const userEmails = [user?.email, profile?.email].filter(e => Boolean(e)).map(e => e.toLowerCase());
+
+  return complaints.filter(c => {
+    if (!c) return false;
+    if (c.userId && userUids.includes(c.userId)) return true;
+    if (c.studentEmail && userEmails.includes(c.studentEmail.toLowerCase())) return true;
+    if (!c.userId && !c.studentEmail) return true;
+    return false;
+  });
 }

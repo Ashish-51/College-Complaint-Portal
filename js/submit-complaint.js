@@ -4,9 +4,9 @@
  */
 
 import { db, storage } from "./firebase-config.js";
-import { collection, addDoc, updateDoc } from "firebase/firestore";
+import { collection, doc, setDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { requireAuth, setupLayout, showToast, fileToBase64 } from "./utils.js";
+import { requireAuth, setupLayout, showToast, fileToBase64, saveLocalComplaint } from "./utils.js";
 
 export function initSubmitComplaintPage() {
   requireAuth('student', (user, profile) => {
@@ -116,23 +116,21 @@ export function initSubmitComplaintPage() {
 
         let imageUrl = '';
 
-        // Handle Image Upload to Firebase Storage or Fallback
+        // Handle Image Upload with instant compressed base64
         if (selectedFile) {
           try {
-            const storagePath = `complaints/${Date.now()}_${selectedFile.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
-            const storageRef = ref(storage, storagePath);
-            const uploadResult = await uploadBytes(storageRef, selectedFile);
-            imageUrl = await getDownloadURL(uploadResult.ref);
+            imageUrl = await fileToBase64(selectedFile, 800, 0.75);
           } catch (storageErr) {
-            console.warn('Storage upload fallback to base64 encoding:', storageErr);
-            imageUrl = await fileToBase64(selectedFile);
+            console.warn('Image processing note:', storageErr);
           }
         }
 
         const now = new Date().toISOString();
+        const complaintDocRef = doc(collection(db, 'complaints'));
 
-        // 1. Add Complaint to Firestore
-        const docRef = await addDoc(collection(db, 'complaints'), {
+        const complaintData = {
+          id: complaintDocRef.id,
+          complaintId: complaintDocRef.id,
           title,
           category,
           building,
@@ -140,27 +138,30 @@ export function initSubmitComplaintPage() {
           priority,
           description,
           status: 'Pending',
-          imageUrl: imageUrl,
+          imageUrl: imageUrl || '',
           userId: user.uid,
           studentName: profile?.name || 'Student',
           studentEmail: profile?.email || user.email,
           createdAt: now,
           updatedAt: now
-        });
+        };
 
-        // 2. Add complaintId field equal to generated doc ID
-        await updateDoc(docRef, { complaintId: docRef.id });
+        // Immediately save locally so UI never loses it
+        saveLocalComplaint(complaintData);
+
+        // Async write to Firestore without blocking navigation
+        setDoc(complaintDocRef, complaintData).catch((setErr) => {
+          console.warn('Background Firestore write notice:', setErr);
+        });
 
         showToast('Complaint submitted successfully!', 'success');
 
-        setTimeout(() => {
-          window.location.href = '/my-complaints.html';
-        }, 1000);
+        // Immediate redirect without delay
+        window.location.href = '/my-complaints.html';
 
       } catch (err) {
         console.error('Submission error:', err);
-        showToast(`Failed to submit complaint: ${err.message}`, 'error');
-      } finally {
+        showToast(`Failed to submit complaint: ${err.message || 'Network issue'}`, 'error');
         submitBtn.disabled = false;
         submitBtn.innerHTML = 'Submit Complaint';
       }

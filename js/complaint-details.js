@@ -12,7 +12,8 @@ import {
   formatDate, 
   renderStatusBadge, 
   renderPriorityBadge, 
-  escapeHTML 
+  escapeHTML,
+  getLocalComplaints
 } from "./utils.js";
 
 export function initComplaintDetailsPage() {
@@ -29,16 +30,28 @@ export function initComplaintDetailsPage() {
     }
 
     try {
-      const docRef = doc(db, 'complaints', complaintId);
-      const docSnap = await getDoc(docRef);
+      let complaint = null;
+      try {
+        const docRef = doc(db, 'complaints', complaintId);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          complaint = { id: docSnap.id, ...docSnap.data() };
+        }
+      } catch (err) {
+        console.warn("Notice fetching remote complaint doc:", err);
+      }
 
-      if (!docSnap.exists()) {
+      if (!complaint) {
+        const localList = getLocalComplaints();
+        complaint = localList.find(c => c.id === complaintId || c.complaintId === complaintId);
+      }
+
+      if (!complaint) {
         showToast('Complaint record not found', 'error');
         setTimeout(() => window.location.href = '/student-dashboard.html', 1500);
         return;
       }
 
-      const complaint = { id: docSnap.id, ...docSnap.data() };
       renderComplaintDetails(complaint, user, profile);
 
     } catch (err) {
@@ -210,7 +223,7 @@ function renderComplaintDetails(item, currentUser, userProfile) {
           updatedAt: new Date().toISOString()
         });
         showToast('Complaint details updated successfully', 'success');
-        setTimeout(() => window.location.reload(), 800);
+        window.location.reload();
       } catch (err) {
         showToast(`Update failed: ${err.message}`, 'error');
       }
@@ -221,7 +234,7 @@ function renderComplaintDetails(item, currentUser, userProfile) {
         try {
           await deleteDoc(doc(db, 'complaints', item.id));
           showToast('Complaint deleted', 'success');
-          setTimeout(() => window.location.href = '/admin-dashboard.html', 800);
+          window.location.href = '/admin-dashboard.html';
         } catch (err) {
           showToast(`Delete failed: ${err.message}`, 'error');
         }
@@ -236,7 +249,7 @@ function renderComplaintDetails(item, currentUser, userProfile) {
         try {
           await deleteDoc(doc(db, 'complaints', item.id));
           showToast('Complaint deleted', 'success');
-          setTimeout(() => window.location.href = '/my-complaints.html', 800);
+          window.location.href = '/my-complaints.html';
         } catch (err) {
           showToast(`Delete failed: ${err.message}`, 'error');
         }

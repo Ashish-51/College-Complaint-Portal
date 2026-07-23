@@ -19,7 +19,9 @@ import {
   formatDate, 
   renderStatusBadge, 
   renderPriorityBadge, 
-  escapeHTML 
+  escapeHTML,
+  mergeComplaints,
+  filterUserComplaints
 } from "./utils.js";
 
 export function initStudentDashboard() {
@@ -31,24 +33,29 @@ export function initStudentDashboard() {
       greetingHeading.textContent = `Welcome back, ${profile?.name || 'Student'}`;
     }
 
-    // Subscribe to Firestore Complaints for logged-in user
-    const complaintsRef = collection(db, 'complaints');
-    const q = query(complaintsRef, where('userId', '==', user.uid));
+    const processComplaints = (remoteList = []) => {
+      const merged = mergeComplaints(remoteList);
+      const studentComplaints = filterUserComplaints(merged, user, profile);
 
-    onSnapshot(q, (snapshot) => {
-      const complaints = [];
+      updateDashboardStats(studentComplaints);
+      renderRecentComplaints(studentComplaints.slice(0, 5));
+    };
+
+    // Render local complaints immediately
+    processComplaints([]);
+
+    // Subscribe to Firestore Complaints
+    const complaintsRef = collection(db, 'complaints');
+    onSnapshot(complaintsRef, (snapshot) => {
+      const remoteComplaints = [];
       snapshot.forEach(docSnap => {
-        complaints.push({ id: docSnap.id, ...docSnap.data() });
+        remoteComplaints.push({ id: docSnap.id, ...docSnap.data() });
       });
 
-      // Sort by createdAt descending
-      complaints.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-
-      updateDashboardStats(complaints);
-      renderRecentComplaints(complaints.slice(0, 5));
+      processComplaints(remoteComplaints);
     }, (error) => {
-      console.error("Error listening to student complaints:", error);
-      showToast("Failed to load complaints stream.", "error");
+      console.warn("Notice listening to complaints stream:", error);
+      processComplaints([]);
     });
   });
 }

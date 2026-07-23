@@ -20,7 +20,9 @@ import {
   formatDate, 
   renderStatusBadge, 
   renderPriorityBadge, 
-  escapeHTML 
+  escapeHTML,
+  mergeComplaints,
+  filterUserComplaints
 } from "./utils.js";
 
 let studentComplaintsData = [];
@@ -30,21 +32,26 @@ export function initMyComplaintsPage() {
   requireAuth('student', (user, profile) => {
     setupLayout('my-complaints', profile);
 
-    const complaintsRef = collection(db, 'complaints');
-    const q = query(complaintsRef, where('userId', '==', user.uid));
+    const processComplaints = (remoteList = []) => {
+      const merged = mergeComplaints(remoteList);
+      studentComplaintsData = filterUserComplaints(merged, user, profile);
+      applyStudentFiltersAndRender();
+    };
 
-    onSnapshot(q, (snapshot) => {
-      studentComplaintsData = [];
+    // Render local complaints immediately
+    processComplaints([]);
+
+    const complaintsRef = collection(db, 'complaints');
+    onSnapshot(complaintsRef, (snapshot) => {
+      const remoteList = [];
       snapshot.forEach(docSnap => {
-        studentComplaintsData.push({ id: docSnap.id, ...docSnap.data() });
+        remoteList.push({ id: docSnap.id, ...docSnap.data() });
       });
 
-      studentComplaintsData.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-
-      applyStudentFiltersAndRender();
+      processComplaints(remoteList);
     }, (err) => {
-      console.error("Error loading my complaints:", err);
-      showToast("Error loading complaint records", "error");
+      console.warn("Notice loading complaints:", err);
+      processComplaints([]);
     });
 
     setupFilterListeners();

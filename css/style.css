@@ -889,6 +889,29 @@ a:hover {
   box-shadow: var(--shadow-xl);
 }
 
+.back-home-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-decoration: none;
+  margin-bottom: 20px;
+  padding: 6px 14px;
+  border-radius: var(--radius-md);
+  background: var(--surface-alt);
+  border: 1px solid var(--border-color);
+  transition: all var(--transition-fast);
+}
+
+.back-home-link:hover {
+  background: var(--primary-light);
+  color: var(--primary);
+  border-color: var(--primary-border);
+  transform: translateX(-2px);
+}
+
 .auth-header {
   text-align: center;
   margin-bottom: 28px;

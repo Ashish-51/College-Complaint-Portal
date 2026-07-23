@@ -62,16 +62,30 @@ function setupProfileForm(user) {
       submitBtn.disabled = true;
       submitBtn.textContent = 'Saving...';
 
-      await updateDoc(doc(db, 'users', user.uid), {
+      const updatedProfileData = {
         name,
         phone,
         department,
         semester,
         updatedAt: new Date().toISOString()
-      });
+      };
+
+      await updateDoc(doc(db, 'users', user.uid), updatedProfileData);
+
+      const savedSession = localStorage.getItem('complaint_portal_session');
+      if (savedSession) {
+        try {
+          const session = JSON.parse(savedSession);
+          localStorage.setItem('complaint_portal_session', JSON.stringify({
+            ...session,
+            ...updatedProfileData
+          }));
+        } catch (e) {}
+      }
 
       showToast('Profile information updated successfully!', 'success');
-      setTimeout(() => window.location.reload(), 1000);
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Save Changes';
 
     } catch (err) {
       console.error('Error updating profile:', err);

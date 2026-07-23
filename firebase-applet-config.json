@@ -1,12 +1,12 @@
 {
-  "projectId": "gen-lang-client-0159838804",
-  "appId": "1:410910445234:web:ca93b135b31b12821043ab",
-  "apiKey": "AIzaSyAMTnalofFSg2UQNlbeiacbWkInSyYpuf4",
-  "authDomain": "gen-lang-client-0159838804.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-smartcollegecomp-39ede956-8a65-4286-bde0-508a69f495ef",
-  "storageBucket": "gen-lang-client-0159838804.firebasestorage.app",
-  "messagingSenderId": "410910445234",
+  "projectId": "smartcomplaint-cc61f",
+  "appId": "1:865611211012:web:a328d282c0ffac7dfab051",
+  "apiKey": "AIzaSyDKp74hyHcYbsJqeWBAUnjHMuIzeDnU6Z0",
+  "authDomain": "smartcomplaint-cc61f.firebaseapp.com",
+  "firestoreDatabaseId": "(default)",
+  "storageBucket": "smartcomplaint-cc61f.firebasestorage.app",
+  "messagingSenderId": "865611211012",
   "measurementId": "",
-  "oAuthClientId": "410910445234-hj2ssqmv2ihcdkp7ha6q5ed2oqk9e5ct.apps.googleusercontent.com",
+  "oAuthClientId": "865611211012-8jr3fue4v5qio8jinkpm7tklq9cu15lk.apps.googleusercontent.com",
   "recaptchaSiteKey": ""
 }

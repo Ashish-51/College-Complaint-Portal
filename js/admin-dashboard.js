@@ -18,7 +18,8 @@ import {
   formatDate, 
   renderStatusBadge, 
   renderPriorityBadge, 
-  escapeHTML 
+  escapeHTML,
+  mergeComplaints
 } from "./utils.js";
 import Chart from "chart.js/auto";
 
@@ -31,23 +32,29 @@ export function initAdminDashboard() {
   requireAuth('admin', (user, profile) => {
     setupLayout('admin-dashboard', profile);
 
-    // Realtime Complaints Listener
-    const complaintsRef = collection(db, 'complaints');
-    onSnapshot(complaintsRef, (snapshot) => {
-      allComplaintsData = [];
-      snapshot.forEach(docSnap => {
-        allComplaintsData.push({ id: docSnap.id, ...docSnap.data() });
-      });
-
-      // Sort by createdAt descending
-      allComplaintsData.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+    const processComplaints = (remoteList = []) => {
+      allComplaintsData = mergeComplaints(remoteList);
 
       updateAdminStats(allComplaintsData);
       renderCharts(allComplaintsData);
       applyFiltersAndRenderTable();
+    };
+
+    // Render local complaints immediately
+    processComplaints([]);
+
+    // Realtime Complaints Listener
+    const complaintsRef = collection(db, 'complaints');
+    onSnapshot(complaintsRef, (snapshot) => {
+      const remoteList = [];
+      snapshot.forEach(docSnap => {
+        remoteList.push({ id: docSnap.id, ...docSnap.data() });
+      });
+
+      processComplaints(remoteList);
     }, (error) => {
-      console.error("Error loading admin complaints:", error);
-      showToast("Failed to fetch complaint data stream", "error");
+      console.warn("Notice loading admin complaints:", error);
+      processComplaints([]);
     });
 
     // Event Listeners for Search & Filters
