@@ -51,6 +51,26 @@ export function initRegisterPage() {
   const registerForm = document.getElementById('register-form');
   if (!registerForm) return;
 
+  const roleSelectElem = document.getElementById('reg-role');
+  const adminCodeGroup = document.getElementById('admin-code-group');
+  const adminCodeInput = document.getElementById('reg-admin-code');
+
+  // Toggle Admin Security Code field visibility based on role selection
+  if (roleSelectElem && adminCodeGroup) {
+    roleSelectElem.addEventListener('change', () => {
+      if (roleSelectElem.value === 'admin') {
+        adminCodeGroup.style.display = 'block';
+        if (adminCodeInput) adminCodeInput.required = true;
+      } else {
+        adminCodeGroup.style.display = 'none';
+        if (adminCodeInput) {
+          adminCodeInput.required = false;
+          adminCodeInput.value = '';
+        }
+      }
+    });
+  }
+
   registerForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -61,7 +81,8 @@ export function initRegisterPage() {
     const department = document.getElementById('reg-department').value;
     const semester = document.getElementById('reg-semester').value;
     const phone = document.getElementById('reg-phone').value.trim();
-    const roleSelect = document.getElementById('reg-role')?.value || 'student';
+    const roleSelect = roleSelectElem?.value || 'student';
+    const adminCode = adminCodeInput?.value.trim().toUpperCase() || '';
 
     const submitBtn = registerForm.querySelector('button[type="submit"]');
 
@@ -79,6 +100,19 @@ export function initRegisterPage() {
     if (password !== confirmPassword) {
       showToast('Passwords do not match', 'error');
       return;
+    }
+
+    // Security Verification Code for Administrator Role
+    if (roleSelect === 'admin') {
+      const validAdminCodes = ['ADMIN2026', 'COLLEGE-ADMIN-2026', 'ADM2026', 'SMARTADMIN'];
+      if (!adminCode) {
+        showToast('Please enter the College Admin Security Code.', 'error');
+        return;
+      }
+      if (!validAdminCodes.includes(adminCode)) {
+        showToast('Invalid Admin Security Code! Only authorized college personnel can register as Administrator.', 'error');
+        return;
+      }
     }
 
     try {
