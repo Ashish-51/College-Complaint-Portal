@@ -19,7 +19,9 @@ import {
   renderStatusBadge, 
   renderPriorityBadge, 
   escapeHTML,
-  mergeComplaints
+  mergeComplaints,
+  updateLocalComplaint,
+  deleteLocalComplaint
 } from "./utils.js";
 import Chart from "chart.js/auto";
 
@@ -283,6 +285,10 @@ function renderAdminTable(complaints) {
     select.addEventListener('change', async (e) => {
       const id = e.target.getAttribute('data-id');
       const newStatus = e.target.value;
+      updateLocalComplaint(id, { status: newStatus });
+      allComplaintsData = mergeComplaints([]);
+      updateAdminStats(allComplaintsData);
+      applyFiltersAndRenderTable();
       try {
         await updateDoc(doc(db, 'complaints', id), {
           status: newStatus,
@@ -290,7 +296,7 @@ function renderAdminTable(complaints) {
         });
         showToast(`Complaint status updated to ${newStatus}`, 'success');
       } catch (err) {
-        showToast(`Failed to update status: ${err.message}`, 'error');
+        showToast(`Updated status locally (${newStatus})`, 'info');
       }
     });
   });
@@ -300,6 +306,10 @@ function renderAdminTable(complaints) {
     select.addEventListener('change', async (e) => {
       const id = e.target.getAttribute('data-id');
       const newPriority = e.target.value;
+      updateLocalComplaint(id, { priority: newPriority });
+      allComplaintsData = mergeComplaints([]);
+      updateAdminStats(allComplaintsData);
+      applyFiltersAndRenderTable();
       try {
         await updateDoc(doc(db, 'complaints', id), {
           priority: newPriority,
@@ -307,7 +317,7 @@ function renderAdminTable(complaints) {
         });
         showToast(`Priority updated to ${newPriority}`, 'success');
       } catch (err) {
-        showToast(`Failed to update priority: ${err.message}`, 'error');
+        showToast(`Updated priority locally (${newPriority})`, 'info');
       }
     });
   });
@@ -317,11 +327,15 @@ function renderAdminTable(complaints) {
     btn.addEventListener('click', async (e) => {
       const id = e.target.getAttribute('data-id');
       if (confirm('Admin Action: Are you sure you want to delete this complaint record permanently?')) {
+        deleteLocalComplaint(id);
+        allComplaintsData = mergeComplaints([]);
+        updateAdminStats(allComplaintsData);
+        applyFiltersAndRenderTable();
         try {
           await deleteDoc(doc(db, 'complaints', id));
           showToast('Complaint removed successfully', 'success');
         } catch (err) {
-          showToast(`Delete failed: ${err.message}`, 'error');
+          showToast('Complaint deleted locally', 'info');
         }
       }
     });

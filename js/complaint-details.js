@@ -13,7 +13,9 @@ import {
   renderStatusBadge, 
   renderPriorityBadge, 
   escapeHTML,
-  getLocalComplaints
+  getLocalComplaints,
+  updateLocalComplaint,
+  deleteLocalComplaint
 } from "./utils.js";
 
 export function initComplaintDetailsPage() {
@@ -25,38 +27,50 @@ export function initComplaintDetailsPage() {
 
     if (!complaintId) {
       showToast('No complaint ID specified', 'error');
-      setTimeout(() => window.location.href = '/student-dashboard.html', 1500);
+      const fallbackUrl = profile?.role === 'admin' ? '/admin-dashboard.html' : '/student-dashboard.html';
+      setTimeout(() => window.location.href = fallbackUrl, 1200);
       return;
     }
 
+    let complaint = null;
+
+    // 1. Check local cache first for instant render
+    const localList = getLocalComplaints();
+    complaint = localList.find(c => c.id === complaintId || c.complaintId === complaintId);
+
+    if (complaint) {
+      renderComplaintDetails(complaint, user, profile);
+    }
+
+    // 2. Fetch remote document with 1 second timeout
     try {
-      let complaint = null;
-      try {
-        const docRef = doc(db, 'complaints', complaintId);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          complaint = { id: docSnap.id, ...docSnap.data() };
-        }
-      } catch (err) {
-        console.warn("Notice fetching remote complaint doc:", err);
-      }
+      const docRef = doc(db, 'complaints', complaintId);
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Fetch timeout')), 1000)
+      );
 
-      if (!complaint) {
-        const localList = getLocalComplaints();
-        complaint = localList.find(c => c.id === complaintId || c.complaintId === complaintId);
-      }
-
-      if (!complaint) {
-        showToast('Complaint record not found', 'error');
-        setTimeout(() => window.location.href = '/student-dashboard.html', 1500);
+      const docSnap = await Promise.race([getDoc(docRef), timeoutPromise]);
+      if (docSnap && typeof docSnap.exists === 'function' && docSnap.exists()) {
+        complaint = { id: docSnap.id, ...docSnap.data() };
+        renderComplaintDetails(complaint, user, profile);
         return;
       }
-
-      renderComplaintDetails(complaint, user, profile);
-
     } catch (err) {
-      console.error('Error fetching complaint details:', err);
-      showToast(`Failed to load details: ${err.message}`, 'error');
+      console.warn("Notice fetching remote complaint doc:", err);
+    }
+
+    // 3. Fallback check
+    if (!complaint) {
+      const refreshedLocal = getLocalComplaints();
+      complaint = refreshedLocal.find(c => c.id === complaintId || c.complaintId === complaintId);
+    }
+
+    if (complaint) {
+      renderComplaintDetails(complaint, user, profile);
+    } else {
+      showToast('Complaint record not found', 'error');
+      const fallbackUrl = profile?.role === 'admin' ? '/admin-dashboard.html' : '/student-dashboard.html';
+      setTimeout(() => window.location.href = fallbackUrl, 1500);
     }
   });
 }
@@ -216,6 +230,8 @@ function renderComplaintDetails(item, currentUser, userProfile) {
       const newStatus = document.getElementById('admin-detail-status').value;
       const newPriority = document.getElementById('admin-detail-priority').value;
 
+      updateLocalComplaint(item.id, { status: newStatus, priority: newPriority });
+
       try {
         await updateDoc(doc(db, 'complaints', item.id), {
           status: newStatus,
@@ -223,21 +239,22 @@ function renderComplaintDetails(item, currentUser, userProfile) {
           updatedAt: new Date().toISOString()
         });
         showToast('Complaint details updated successfully', 'success');
-        window.location.reload();
       } catch (err) {
-        showToast(`Update failed: ${err.message}`, 'error');
+        showToast('Updated locally', 'info');
       }
+      window.location.reload();
     });
 
     document.getElementById('admin-detail-delete-btn')?.addEventListener('click', async () => {
       if (confirm('Are you sure you want to delete this complaint record permanently?')) {
+        deleteLocalComplaint(item.id);
         try {
           await deleteDoc(doc(db, 'complaints', item.id));
           showToast('Complaint deleted', 'success');
-          window.location.href = '/admin-dashboard.html';
         } catch (err) {
-          showToast(`Delete failed: ${err.message}`, 'error');
+          showToast('Deleted locally', 'info');
         }
+        window.location.href = '/admin-dashboard.html';
       }
     });
   }
@@ -246,13 +263,14 @@ function renderComplaintDetails(item, currentUser, userProfile) {
   if (isOwner && isPending) {
     document.getElementById('detail-delete-btn')?.addEventListener('click', async () => {
       if (confirm('Are you sure you want to delete this pending complaint?')) {
+        deleteLocalComplaint(item.id);
         try {
           await deleteDoc(doc(db, 'complaints', item.id));
           showToast('Complaint deleted', 'success');
-          window.location.href = '/my-complaints.html';
         } catch (err) {
-          showToast(`Delete failed: ${err.message}`, 'error');
+          showToast('Deleted locally', 'info');
         }
+        window.location.href = '/my-complaints.html';
       }
     });
   }

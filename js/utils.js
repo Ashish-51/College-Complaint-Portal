@@ -392,6 +392,27 @@ export function saveLocalComplaint(complaint) {
   } catch (e) {}
 }
 
+export function updateLocalComplaint(id, updates) {
+  try {
+    const existing = getLocalComplaints();
+    const updated = existing.map(c => {
+      if (c.id === id || c.complaintId === id) {
+        return { ...c, ...updates, updatedAt: new Date().toISOString() };
+      }
+      return c;
+    });
+    localStorage.setItem('local_submitted_complaints', JSON.stringify(updated));
+  } catch (e) {}
+}
+
+export function deleteLocalComplaint(id) {
+  try {
+    const existing = getLocalComplaints();
+    const updated = existing.filter(c => c.id !== id && c.complaintId !== id);
+    localStorage.setItem('local_submitted_complaints', JSON.stringify(updated));
+  } catch (e) {}
+}
+
 export function mergeComplaints(remoteList) {
   const localList = getLocalComplaints();
   const map = new Map();

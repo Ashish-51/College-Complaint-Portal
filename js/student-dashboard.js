@@ -21,7 +21,8 @@ import {
   renderPriorityBadge, 
   escapeHTML,
   mergeComplaints,
-  filterUserComplaints
+  filterUserComplaints,
+  deleteLocalComplaint
 } from "./utils.js";
 
 export function initStudentDashboard() {
@@ -99,6 +100,7 @@ function renderRecentComplaints(complaints) {
 
   tableBody.innerHTML = complaints.map(c => {
     const isPending = (c.status || 'Pending').toLowerCase() === 'pending';
+    const itemId = c.id || c.complaintId;
 
     return `
       <tr>
@@ -112,9 +114,9 @@ function renderRecentComplaints(complaints) {
         <td style="font-size: 13px; color: var(--text-secondary);">${formatDate(c.createdAt)}</td>
         <td>
           <div style="display: flex; gap: 8px;">
-            <a href="/complaint-details.html?id=${c.id}" class="btn btn-secondary btn-sm" title="View Details">View</a>
+            <a href="/complaint-details.html?id=${itemId}" class="btn btn-secondary btn-sm" title="View Details">View</a>
             ${isPending ? `
-              <button class="btn btn-outline btn-sm delete-complaint-btn" data-id="${c.id}" title="Delete Complaint">Delete</button>
+              <button class="btn btn-danger btn-sm delete-complaint-btn" data-id="${itemId}" title="Delete Complaint">Delete</button>
             ` : ''}
           </div>
         </td>
@@ -127,12 +129,14 @@ function renderRecentComplaints(complaints) {
     btn.addEventListener('click', async (e) => {
       const complaintId = e.target.getAttribute('data-id');
       if (confirm('Are you sure you want to delete this pending complaint?')) {
+        deleteLocalComplaint(complaintId);
         try {
           await deleteDoc(doc(db, 'complaints', complaintId));
           showToast('Complaint deleted successfully', 'success');
         } catch (err) {
-          showToast(`Delete failed: ${err.message}`, 'error');
+          showToast('Deleted locally', 'info');
         }
+        window.location.reload();
       }
     });
   });

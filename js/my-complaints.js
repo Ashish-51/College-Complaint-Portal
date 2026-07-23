@@ -22,7 +22,9 @@ import {
   renderPriorityBadge, 
   escapeHTML,
   mergeComplaints,
-  filterUserComplaints
+  filterUserComplaints,
+  deleteLocalComplaint,
+  updateLocalComplaint
 } from "./utils.js";
 
 let studentComplaintsData = [];
@@ -117,6 +119,7 @@ function renderTable(complaints) {
 
   tableBody.innerHTML = complaints.map(c => {
     const isPending = (c.status || 'Pending').toLowerCase() === 'pending';
+    const itemId = c.id || c.complaintId;
 
     return `
       <tr>
@@ -130,10 +133,10 @@ function renderTable(complaints) {
         <td style="font-size: 13px; color: var(--text-secondary);">${formatDate(c.createdAt)}</td>
         <td>
           <div style="display: flex; gap: 8px;">
-            <a href="/complaint-details.html?id=${c.id}" class="btn btn-secondary btn-sm" title="View Details">Details</a>
+            <a href="/complaint-details.html?id=${itemId}" class="btn btn-secondary btn-sm" title="View Details">Details</a>
             ${isPending ? `
-              <button class="btn btn-outline btn-sm edit-btn" data-id="${c.id}">Edit</button>
-              <button class="btn btn-danger btn-sm delete-btn" data-id="${c.id}">Delete</button>
+              <button class="btn btn-outline btn-sm edit-btn" data-id="${itemId}">Edit</button>
+              <button class="btn btn-danger btn-sm delete-btn" data-id="${itemId}">Delete</button>
             ` : ''}
           </div>
         </td>
@@ -153,19 +156,21 @@ function renderTable(complaints) {
     btn.addEventListener('click', async (e) => {
       const id = e.target.getAttribute('data-id');
       if (confirm('Are you sure you want to delete this pending complaint?')) {
+        deleteLocalComplaint(id);
         try {
           await deleteDoc(doc(db, 'complaints', id));
           showToast('Complaint deleted successfully', 'success');
         } catch (err) {
-          showToast(`Delete failed: ${err.message}`, 'error');
+          showToast('Deleted locally', 'info');
         }
+        window.location.reload();
       }
     });
   });
 }
 
 function openEditModal(complaintId) {
-  const item = studentComplaintsData.find(c => c.id === complaintId);
+  const item = studentComplaintsData.find(c => c.id === complaintId || c.complaintId === complaintId);
   if (!item) return;
 
   activeEditId = complaintId;
@@ -211,21 +216,26 @@ function setupEditModal() {
       return;
     }
 
-    try {
-      await updateDoc(doc(db, 'complaints', activeEditId), {
-        title,
-        category,
-        building,
-        roomNumber,
-        priority,
-        description,
-        updatedAt: new Date().toISOString()
-      });
+    const editData = {
+      title,
+      category,
+      building,
+      roomNumber,
+      priority,
+      description,
+      updatedAt: new Date().toISOString()
+    };
 
+    updateLocalComplaint(activeEditId, editData);
+
+    try {
+      await updateDoc(doc(db, 'complaints', activeEditId), editData);
       showToast('Complaint updated successfully', 'success');
-      modal?.classList.remove('show');
     } catch (err) {
-      showToast(`Update failed: ${err.message}`, 'error');
+      showToast('Updated locally', 'info');
     }
+
+    modal?.classList.remove('show');
+    window.location.reload();
   });
 }
